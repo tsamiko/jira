@@ -2,6 +2,12 @@ name: cloud
 
 on:
   workflow_call:
+    inputs:
+      ref:
+        type: string
+        description: 'Ref (SHA/branch) to run the workflow on'
+        required: true
+        default: 'main'
     secrets:
       CLOUD_ADMIN:
         required: true
@@ -12,7 +18,12 @@ on:
       CLOUD_USER_TOKEN:
         required: true
   workflow_dispatch:
-
+    inputs:
+      ref:
+        type: string
+        description: 'Ref (SHA/branch) to run the workflow on'
+        required: true
+        default: 'main'
 jobs:
   test:
     environment: cloud
@@ -26,10 +37,12 @@ jobs:
         python-version: ["3.10"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.ref }}
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip

@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Switch to using Python 3.10 by default
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -30,7 +30,7 @@ jobs:
         run: python3 -m pip install --user "tox>=4.0.0"
 
       - name: Check out src from Git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0  # needed by setuptools-scm
           submodules: true
@@ -51,25 +51,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-    environment:
-      name: pypi-publishing
-      url: https://pypi.org/project/jira/
+      contents: write
+    environment: release
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: package
           path: dist
-
       - name: Show tree
         run: tree
-
       - name: Publish to pypi.org
         if: >-  # "create" workflows run separately from "push" & "pull_request"
           github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
   asset:
     needs: [build]
@@ -78,7 +73,7 @@ jobs:
       contents: write
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: package
           path: dist
@@ -87,7 +82,7 @@ jobs:
         run: tree
 
       - name: Add release asset
-        uses: softprops/action-gh-release@c95fe1489396fe8a9eb87c0abf8aa5b2ef267fda
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8
         with:
           tag_name: ${{ github.event.release.tag_name }}
           fail_on_unmatched_files: true
